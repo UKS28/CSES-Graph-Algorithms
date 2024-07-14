@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i, st, ed) for (int i = st; i < ed; i++)
+
+
+void dfs(vector<vector<char>> &adj, int i, int j)
+{
+  int n = adj.size();
+  int m = adj[0].size();
+  adj[i][j] = '#';
+
+  vector<int> dir = {0, 1, 0, -1, 0};
+  for (int k = 0; k < 4; k++)
+  {
+    int newi = i + dir[k];
+    int newj = j + dir[k + 1];
+    if (newi >= 0 && newj >= 0 && newi < n && newj < m && adj[newi][newj] == '.')
+    {
+      dfs(adj, newi, newj);
+    }
+  }
+}
+int main()
+{
+  int n, m;
+  cin >> n >> m;
+
+  vector<vector<char>> adj(n, vector<char>(m));
+  rep(i, 0, n)
+  {
+    rep(j, 0, m)
+    {
+      cin >> adj[i][j];
+    }
+  }
+  int cnt = 0;
+
+  for (int i = 0; i < n; i++)
+  {
+    for (int j = 0; j < m; j++)
+    {
+      if (adj[i][j] == '.')
+      {
+        dfs(adj, i, j);
+        cnt++;
+      }
+    }
+  }
+
+  cout << cnt << endl;
+}
