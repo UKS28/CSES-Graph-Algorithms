@@ -1,0 +1,64 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i, st, ed) for (int i = st; i < ed; i++)
+
+// SUBPROBLEM
+// -- DIVIDING GRAPH > CLUELESS
+// -- DIVIDING AMONG TWO GROUP --> BIPARTITE
+
+bool bfs(vector<int> adj[], vector<int> &color, int node, int c)
+{
+  color[node] = c;
+  int newcolor = c;
+  if (c == 1)
+    newcolor = 2;
+  else
+    newcolor = 1;
+
+  for (auto &adjnode : adj[node])
+  {
+    if (color[adjnode] == 0)
+    {
+      if (bfs(adj, color, adjnode, newcolor) == false)
+        return false;
+    }
+    else if (color[adjnode] == c)
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
+int main()
+{
+  int n, m;
+  cin >> n >> m;
+  vector<int> adj[n + 1];
+  while (m--)
+  {
+    int u, v;
+    cin >> u >> v;
+    adj[u].push_back(v);
+    adj[v].push_back(u);
+  }
+
+  vector<int> color(n + 1, 0);
+  bool possible = true;
+  for (int i = 1; i <= n; i++)
+  {
+    if (color[i] == 0)
+    {
+      possible = bfs(adj, color, i, 1);
+    }
+    if (possible == false)
+    {
+      cout << "IMPOSSIBLE\n";
+      return 0;
+    }
+  }
+
+  for (int i = 1; i <= n; i++)
+    cout << color[i] << " ";
+}
