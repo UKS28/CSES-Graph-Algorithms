@@ -1,0 +1,85 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i, st, ed) for (int i = st; i < ed; i++)
+
+// SUBPROBLEM
+// -- find route ==> Traversal(bfs/dfs)
+// -- if possible path then , minm node between 1 to n (Shortest path)=>BFS
+// -- print the path ==> BackTracking
+
+bool bfs(int u, int n, vector<int> adj[], vector<int> &back)
+{
+  queue<int> q;
+  vector<int> vis(n + 1);
+
+  q.push(1);
+  back[1] = -1;
+  vis[1] = 1;
+
+  bool flag = false;
+  while (q.empty() == false)
+  {
+    int node = q.front();
+    q.pop();
+
+    if (node == n)
+    {
+      flag = true;
+      break;
+    }
+
+    for (auto &adjNode : adj[node])
+    {
+      if (vis[adjNode] == 0)
+      {
+        vis[adjNode] = 1;
+        q.push(adjNode);
+        back[adjNode] = node;
+      }
+    }
+  }
+  return flag;
+}
+
+vector<int> backTrack(int n, vector<int> &back)
+{
+  vector<int> res;
+  int node = n;
+  res.push_back(node);
+  while (node != 1)
+  {
+    res.push_back(back[node]);
+    node = back[node];
+  }
+  reverse(res.begin(), res.end());
+  return res;
+}
+int main()
+{
+  int n, m;
+  cin >> n >> m;
+  vector<int> adj[n + 1];
+  while (m--)
+  {
+    int u, v;
+    cin >> u >> v;
+    adj[u].push_back(v);
+    adj[v].push_back(u);
+  }
+  vector<int> back(n + 1);
+  bool possible = bfs(1, n, adj, back);
+  if (possible == false)
+  {
+    cout << "IMPOSSIBLE\n";
+  }
+  else
+  {
+    vector<int> ans = backTrack(n, back);
+    cout << ans.size() << endl;
+    rep(i, 0, ans.size())
+            cout
+        << ans[i] << " ";
+    cout << endl;
+  }
+}
