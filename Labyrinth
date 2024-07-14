@@ -1,0 +1,105 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i, st, ed) for (int i = st; i < ed; i++)
+
+// SUBPROBLEM
+//  -- graph traversal-> bfs/dfs
+// ---shortest path -->bfs
+// ---path of shortest path --> backtracking
+//  (BFS+ BACKTRACKING)
+
+bool bfs(vector<vector<char>> &adj, pair<int, int> &st, pair<int, int> &end, vector<vector<pair<pair<int, int>, char>>> &back)
+{
+  queue<pair<int, int>> q;
+
+  q.push(st);
+  back[st.first][st.second] = {{-1, -1}, 'o'};
+  adj[st.first][st.second] = '#';
+
+  vector<int> dir = {0, 1, 0, -1, 0};
+  string dir1 = "RDLU";
+  bool flag = false;
+
+  while (q.empty() == false)
+  {
+    pair<int, int> curr = q.front();
+    q.pop();
+
+    if (curr.first == end.first && curr.second == end.second)
+    {
+      flag = true;
+      break;
+    }
+
+    for (int k = 0; k < 4; k++)
+    {
+      int newi = curr.first + dir[k];
+      int newj = curr.second + dir[k + 1];
+      if (
+          newi >= 0 && newj >= 0 && newi < adj.size() && newj < adj[0].size() &&
+          (adj[newi][newj] == '.' || adj[newi][newj] == 'B'))
+      {
+        q.push({newi, newj});
+        back[newi][newj] = {{curr.first, curr.second}, dir1[k]};
+        adj[newi][newj] = '#';
+      }
+    }
+  }
+  return flag;
+}
+
+string backtrack(pair<int, int> &st, pair<int, int> &end, vector<vector<pair<pair<int, int>, char>>> &back)
+{
+
+  string ans = "";
+  int i = end.first, j = end.second;
+  while (!(i == st.first && j == st.second))
+  {
+    // cout<<i<<" "<<j<<endl;
+    ans += back[i][j].second;
+    int newi = back[i][j].first.first;
+    int newj = back[i][j].first.second;
+    i = newi;
+    j = newj;
+  }
+  reverse(ans.begin(), ans.end());
+  return ans;
+}
+int main()
+{
+  int n, m;
+  cin >> n >> m;
+  vector<vector<char>> adj(n, vector<char>(m));
+  pair<int, int> st, end;
+  rep(i, 0, n)
+  {
+    rep(j, 0, m)
+    {
+      cin >> adj[i][j];
+      if (adj[i][j] == 'A')
+        st = {i, j};
+      if (adj[i][j] == 'B')
+        end = {i, j};
+    }
+  }
+  vector<vector<pair<pair<int, int>, char>>> back(n, vector<pair<pair<int, int>, char>>(m));
+  for (int i = 0; i < n; i++)
+  {
+    for (int j = 0; j < m; j++)
+    {
+      back[i][j].second = '-';
+    }
+  }
+  bool flag = bfs(adj, st, end, back);
+
+  if (flag == false)
+    cout << "NO\n";
+  else
+  {
+    cout << "YES\n";
+    string ans = backtrack(st, end, back);
+    cout << ans.length() << endl;
+    cout << ans << endl;
+  }
+}
