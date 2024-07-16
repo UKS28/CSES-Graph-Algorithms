@@ -1,0 +1,182 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i, st, ed) for (int i = st; i < ed; i++)
+
+// SUBPROBLEM
+// -- timing of each moster , so mutisource bfs
+// -- know if the man want to cover a particular square then he must cross it before the monster
+// -- find shortest path  from man to each valid cell - bfs (no dfs)
+
+string backTrack(vector<vector<pair<pair<int, int>, char>>> &back, pair<int, int> &end, int stx, int sty)
+{
+    int x = end.first, y = end.second;
+    string res = "";
+    while (!(x == stx && y == sty))
+    {
+        int newx = back[x][y].first.first;
+        int newy = back[x][y].first.second;
+        res += back[x][y].second;
+        // cout<<x<<" "<<y<<" "<<newx<<" "<<newy<<endl;
+        x = newx;
+        y = newy;
+    }
+    reverse(res.begin(), res.end());
+    return res;
+}
+
+// DFS WILL NOT BE VALID AS WE NEED SHORTEST PATH
+// bool dfs(int x, int y, vector<vector<int>> &dis, vector<vector<char>> &adj, vector<vector<int>> &vis, vector<vector<pair<pair<int, int>, char>>> &par, int time, pair<int, int> &end)
+// {
+//     if (x == 0 || y == 0 || x == adj.size() - 1 || y == adj[0].size() - 1)
+//     {
+//         end = {x, y};
+//         return true;
+//     }
+//     vis[x][y] = 1;
+//     time++;
+
+//     vector<int> dir = {0, 1, 0, -1, 0};
+//     string dir1 = "RDLU";
+//     bool possible = false;
+//     for (int k = 0; k < 4; k++)
+//     {
+//         int newx = x + dir[k];
+//         int newy = y + dir[k + 1];
+//         if (
+//             newx >= 0 && newy >= 0 && newx < adj.size() && newy < adj[0].size() && vis[newx][newy] == 0 && adj[newx][newy] == '.' && dis[newx][newy] > time)
+//         {
+//             par[newx][newy] = {{x, y}, dir1[k]};
+//             possible = dfs(newx, newy, dis, adj, vis, par, time, end);
+//             if (possible)
+//                 return true;
+//         }
+//     }
+//     return false;
+// }
+
+// dis[i][j]--> contains time taken by monster to cross cell i,j
+// par[i][j]={{parx,pary},'dirrection'}
+// end gives the final boundary
+bool bfs(int x, int y, vector<vector<int>> &dis, vector<vector<char>> &adj, vector<vector<pair<pair<int, int>, char>>> &par, int time, pair<int, int> &end)
+{
+    int n = adj.size();
+    int m = adj[0].size();
+    queue<pair<pair<int, int>, int>> q;
+    vector<vector<int>> vis(n, vector<int>(m, 0));
+    vector<int> dir = {0, 1, 0, -1, 0};
+    string dir1 = "RDLU";
+
+    q.push({{x, y}, 0});
+    par[x][y] = {{-1, -1}, 'o'};
+    vis[x][y] = 1;
+    vector<vector<int>> distance(n, vector<int>(m, INT_MAX));
+    distance[x][y] = 0;
+
+    while (q.empty() == false)
+    {
+        int x = q.front().first.first;
+        int y = q.front().first.second;
+        int t = q.front().second;
+        q.pop();
+
+        if (x == 0 || y == 0 || x == n - 1 || y == m - 1)
+        {
+            end = {x, y};
+            return true;
+        }
+        for (int k = 0; k < 4; k++)
+        {
+            int newx = x + dir[k];
+            int newy = y + dir[k + 1];
+            if (
+                newx >= 0 && newy >= 0 && newx < n && newy < m && vis[newx][newy] == 0 && adj[newx][newy] == '.' && distance[newx][newy] > distance[x][y] + 1 && dis[newx][newy] > distance[x][y] + 1)
+            {
+                vis[newx][newy] = 1;
+                par[newx][newy] = {{x, y}, dir1[k]};
+                distance[newx][newy] = distance[x][y] + 1;
+                q.push({{newx, newy}, distance[newx][newy]});
+            }
+        }
+    }
+    return false;
+}
+
+int main()
+{
+    int n, m;
+    cin >> n >> m;
+    vector<vector<char>> adj(n, vector<char>(m));
+    vector<vector<int>> dis(n, vector<int>(m, INT_MAX));
+    queue<pair<pair<int, int>, int>> q;
+    int stx, sty;
+    pair<int, int> end = {-1, -1};
+    rep(i, 0, n)
+    {
+        rep(j, 0, m)
+        {
+            cin >> adj[i][j];
+            if (adj[i][j] == 'M')
+            {
+                q.push({{i, j}, 0});
+                dis[i][j] = 0;
+            }
+            if (adj[i][j] == 'A')
+            {
+                stx = i;
+                sty = j;
+            }
+        }
+    }
+
+    vector<int> dir = {0, 1, 0, -1, 0};
+    while (q.empty() == false)
+    {
+        int x = q.front().first.first;
+        int y = q.front().first.second;
+        int t = q.front().second;
+        q.pop();
+
+        for (int k = 0; k < 4; k++)
+        {
+            int newx = x + dir[k];
+            int newy = y + dir[k + 1];
+            if (newx >= 0 && newy >= 0 && newx < n && newy < m && adj[newx][newy] == '.')
+            {
+                if (dis[newx][newy] > dis[x][y] + 1)
+                {
+                    dis[newx][newy] = dis[x][y] + 1;
+                    q.push({{newx, newy}, dis[newx][newy]});
+                }
+            }
+        }
+    }
+
+    // for(int i=0;i<n;i++)
+    // {
+    //     for(int j=0;j<m;j++)cout<<dis[i][j]<<' ';
+    //     cout<<endl;
+    // }
+    vector<vector<pair<pair<int, int>, char>>> back(n, vector<pair<pair<int, int>, char>>(m));
+    vector<vector<int>> vis(n, vector<int>(m, 0));
+    bool possible = bfs(stx, sty, dis, adj, back, 0, end);
+    if (!possible)
+    {
+        cout << "NO\n";
+    }
+    else
+    {
+        cout << "YES\n";
+
+        string res = backTrack(back, end, stx, sty);
+        cout << res.length() << endl;
+        cout << res << endl;
+        // for(int i=0;i<n;i++)
+        // {
+        //     for(int j=0;j<m;j++)
+        //     cout<<" {"<<back[i][j].first.first<<" "<<back[i][j].first.second<<"} "<<"   ";
+        //     cout<<endl;
+        // }
+        // cout<<end.first<<" "<<end.second<<endl;
+    }
+}
