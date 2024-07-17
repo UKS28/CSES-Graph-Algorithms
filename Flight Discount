@@ -1,0 +1,86 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i, st, ed) for (int i = st; i < ed; i++)
+// Subproblem
+// --- Shortest path -Dijkstra
+// --- DP like thinking
+int main()
+{
+    int n, m;
+    cin >> n >> m;
+    vector<pair<int, ll>> adj[n + 1];
+    while (m--)
+    {
+        int a, b;
+        ll cost;
+        cin >> a >> b >> cost;
+        adj[a].push_back({b, cost});
+    }
+
+    vector<ll> full(n + 1, 1e14), half(n + 1, 1e14);
+    full[1] = 0;
+    half[1] = 0;
+    // if coupon used then bool value is 0
+    // if coupon not used then bool value 1
+    // {wt,{dest,flag}}
+    priority_queue<pair<ll, pair<int, bool>>,
+                   vector<pair<ll, pair<int, bool>>>,
+                   greater<pair<ll, pair<int, bool>>>>
+        pq;
+    vector<vector<bool>> visited(n + 1, vector<bool>(2, false)); // visited[node][flag]
+
+    pq.push({0, {1, 1}});
+    ll ans = -1;
+    while (pq.empty() == false)
+    {
+        ll wt = pq.top().first;
+        ll node = pq.top().second.first;
+        bool flag = pq.top().second.second;
+        pq.pop();
+
+        if (visited[node][flag])
+            continue; // Skip if already visited
+        visited[node][flag] = true;
+
+        if (node == n)
+        {
+            ans = wt;
+            break;
+        };
+
+        for (auto itr : adj[node])
+        {
+            int adjnode = itr.first;
+            ll cost = itr.second;
+            // only one option
+
+            if (flag == 0)
+            {
+                if (half[adjnode] > half[node] + cost)
+                {
+                    half[adjnode] = half[node] + cost;
+                    pq.push({half[adjnode], {adjnode, flag}});
+                }
+            }
+            else
+            {
+                // we use the coupon
+                ll halfwt = cost / 2;
+                if (half[adjnode] > full[node] + halfwt)
+                {
+                    half[adjnode] = full[node] + halfwt;
+                    pq.push({half[adjnode], {adjnode, 0}});
+                }
+                // WE WILL NOT USE THE COUPON
+                if (full[adjnode] > full[node] + cost)
+                {
+                    full[adjnode] = full[node] + cost;
+                    pq.push({full[adjnode], {adjnode, 1}});
+                }
+            }
+        }
+    }
+
+    cout << ans << endl;
+}
