@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i, st, ed) for (int i = st; i < ed; i++)
+// Subproblem
+// -- single source longest path SSLP(bellman ford as negative also)
+// -- for maximum weight we will use trick of storing -w (not +w) and then or ans will be -ans
+// -- if there is a cycle ,then to prapagate change to all these nodes we neee to iterate n-1 or n time.
+int main()
+{
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    ll n, m;
+    cin >> n >> m;
+    vector<vector<ll>> edges;
+    while (m--)
+    {
+        ll u, v, wt;
+        cin >> u >> v >> wt;
+        wt = (-1 * wt);
+        edges.push_back({u, v, wt});
+    }
+
+    vector<ll> dist(n + 1, 1e17);
+    dist[1] = 0;
+    // N-1 RELAXATION FIRST
+    for (int i = 0; i < n - 1; i++)
+    {
+        for (auto itr : edges)
+        {
+            ll u = itr[0];
+            ll v = itr[1];
+            ll wt = itr[2];
+            if (dist[u] == 1e17)
+                continue;
+            if (dist[v] > dist[u] + wt)
+                dist[v] = dist[u] + wt;
+        }
+    }
+
+    //    if any modification is done then imply cycle
+    //    and if there is a cycle ,then to prapagate change to all these we node to iterate n-1 or n time.
+    for (int i = 0; i <= n - 1; i++)
+    {
+        for (auto itr : edges)
+        {
+            ll u = itr[0];
+            ll v = itr[1];
+            ll wt = itr[2];
+
+            if (dist[u] == 1e17)
+                continue;
+            if (dist[u] == (-1 * (1e17)) || dist[v] > dist[u] + wt)
+                dist[v] = -1 * (1e17);
+        }
+    }
+
+    if (dist[n] == (-1 * (1e17)))
+        cout << -1 << endl;
+    else
+        cout << (-1 * dist[n]) << endl;
+}
