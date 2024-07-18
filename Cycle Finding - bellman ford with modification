@@ -1,0 +1,88 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i, st, ed) for (int i = st; i < ed; i++)
+// Subproblem
+// -- negative cycle detection (bellman ford)
+// -- modification to backtrack
+
+ll n, m;
+vector<vector<ll>> edges;
+vector<ll> dist;
+vector<ll> relaxant;
+
+void bellman_ford()
+{
+    ll x;
+    // simple relaxation for finding cycles
+    for (ll i = 1; i <= n; ++i)
+    {
+        x = -1;
+        for (auto e : edges)
+        {
+            ll u = e[0];
+            ll v = e[1];
+            ll d = e[2];
+            if (dist[u] + d < dist[v])
+            {
+                dist[v] = d + dist[u];
+                relaxant[v] = u;
+                x = v;
+            }
+        }
+    }
+
+    if (x == -1)
+        cout << "NO" << endl;
+
+    else
+    {
+        // to find out a vertex in cycle we will take n or n-1 iteration
+        for (ll i = 1; i <= n; ++i)
+        {
+            x = relaxant[x];
+        }
+
+        vector<ll> cycle;
+        //  store those in our vector untill we reach again at that vertex
+        for (ll v = x;; v = relaxant[v])
+        {
+            cycle.push_back(v);
+            if (v == x and cycle.size() > 1)
+                break;
+        }
+        // store in sequence.
+        reverse(cycle.begin(), cycle.end());
+
+        cout << "YES" << endl;
+        for (auto v : cycle)
+        {
+            cout << v << " ";
+        }
+
+        cout << endl;
+    }
+}
+
+int main()
+{
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cin >> n >> m;
+    dist.resize(n + 1);
+    relaxant.resize(n + 1);
+    edges.resize(m);
+
+    for (int i = 0; i < m; ++i)
+    {
+        ll u, v, w;
+        cin >> u >> v >> w;
+        edges[i] = {u, v, w};
+    }
+
+    for (int i = 1; i <= n; ++i)
+    {
+        relaxant[i] = -1;
+    }
+    bellman_ford();
+}
