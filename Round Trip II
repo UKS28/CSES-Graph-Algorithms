@@ -1,0 +1,90 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i, st, ed) for (int i = st; i < ed; i++)
+// SUB PROBLEM
+// --cycle detection in directed graph
+// --simple dfs check if we have visited the node and if we are on the same path then we will return there is cycle
+// --along with that we will store their parents
+// --along with that we also need to capture out the last node in the cycle if there is a cycle
+bool dfs(vector<ll> adj[], vector<bool> &vis, vector<bool> &pathVis, vector<ll> &par, ll node, ll &last)
+{
+    vis[node] = 1;
+    pathVis[node] = 1;
+    for (ll &adjnode : adj[node])
+    {
+        par[adjnode] = node;
+        if (vis[adjnode] == 0)
+        {
+            bool isCycle = dfs(adj, vis, pathVis, par, adjnode, last);
+            if (isCycle)
+                return true;
+        }
+        else if (pathVis[adjnode] == 1)
+        {
+            last = adjnode;
+            return true;
+        }
+    }
+    pathVis[node] = 0;
+    return false;
+}
+
+int main()
+{
+    ll n, m;
+    cin >> n >> m;
+    vector<ll> adj[n + 1];
+    while (m--)
+    {
+        ll a, b;
+        cin >> a >> b;
+        adj[a].push_back(b);
+    }
+
+    // last node in the cycle
+    ll node = -1;
+
+    vector<bool> vis(n + 1, 0), pathVis(n + 1, 0);
+    vector<ll> par(n + 1, -1);
+
+    for (ll i = 1; i <= n; i++)
+    {
+        if (vis[i] == 0)
+        {
+            bool ispossible = dfs(adj, vis, pathVis, par, i, node);
+            if (ispossible)
+            {
+                break;
+            }
+        }
+    }
+
+    if (node == -1)
+    {
+        cout << "IMPOSSIBLE\n";
+    }
+    else
+    {
+        vector<ll> res;
+
+        ll last = node;
+        res.push_back(last);
+        last = par[last];
+
+        while (last != node)
+        {
+            res.push_back(last);
+            last = par[last];
+        }
+        res.push_back(last);
+
+        reverse(res.begin(), res.end());
+
+        // print the answer
+        cout << res.size() << endl;
+        for (ll &itr : res)
+            cout << itr << " ";
+    }
+    cout << endl;
+}
