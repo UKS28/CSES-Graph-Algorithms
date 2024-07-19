@@ -1,0 +1,61 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i, st, ed) for (int i = st; i < ed; i++)
+
+// SUBPROBLEM
+// --topological sort
+
+int main()
+{
+    ll n, m;
+    cin >> n >> m;
+    vector<ll> adj[n + 1];
+    vector<ll> indegree(n + 1);
+
+    // creating adjacency list and storing indegree
+    while (m--)
+    {
+        ll u, v;
+        cin >> u >> v;
+        adj[u].push_back(v);
+        indegree[v]++;
+    }
+
+    queue<ll> q;
+    // push indegree[i]=0 first
+    for (int i = 1; i <= n; i++)
+        if (indegree[i] == 0)
+            q.push(i);
+
+    vector<ll> res;
+    while (q.empty() == false)
+    {
+        ll node = q.front();
+        res.push_back(node);
+        q.pop();
+
+        for (ll adjnode : adj[node])
+        {
+            indegree[adjnode]--;
+            if (indegree[adjnode] == 0)
+                q.push(adjnode);
+        }
+    }
+    // if any node having indegree value is not 0 return impossible
+    for (int i = 1; i <= n; i++)
+    {
+        if (indegree[i] != 0)
+        {
+            cout << "IMPOSSIBLE\n";
+            return 0;
+        }
+    }
+
+    // othewise return the resultant order
+    for (ll &itr : res)
+    {
+        cout << itr << " ";
+    }
+    cout << endl;
+}
