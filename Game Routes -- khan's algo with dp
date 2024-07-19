@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i, st, ed) for (int i = st; i < ed; i++)
+
+// SUBPROBLEM
+// -- look after each path, dfs like thing will give tle
+// -- for directed graph we will use khan's algorithm
+// -- with some trick - we will store the dis using dp
+// -- if we reach vertex u --> k1 time and with there is edge from u->v  then we will reach v k1+k2 time where k2 is number of time we will visit v earlier.
+
+int main()
+{
+    ll mod = 1e9 + 7;
+    int n, m;
+    cin >> n >> m;
+    vector<int> adj[n + 1];
+    vector<ll> indegree(n + 1);
+
+    while (m--)
+    {
+        ll u, v;
+        cin >> u >> v;
+        adj[u].push_back(v);
+        indegree[v]++;
+    }
+
+    vector<ll> dp(n + 1);
+    queue<int> q;
+    for (int i = 1; i <= n; i++)
+    {
+        if (indegree[i] == 0)
+            q.push(i);
+    }
+
+    dp[1] = 1;
+    while (q.empty() == false)
+    {
+        int node = q.front();
+        q.pop();
+
+        for (int &adjnode : adj[node])
+        {
+            dp[adjnode] = ((dp[node] + dp[adjnode]) % mod);
+            indegree[adjnode]--;
+            if (indegree[adjnode] == 0)
+                q.push(adjnode);
+        }
+    }
+    cout << dp[n] << endl;
+};
