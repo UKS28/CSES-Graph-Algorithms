@@ -1,0 +1,91 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i, st, ed) for (int i = st; i < ed; i++)
+
+// SUBPROBLEM
+// -- we need to print after each query disjoint set union
+// -- we also need to keep track of maximum  size
+
+class DSU
+{
+public:
+    vector<int> par;
+    vector<ll> size;
+    int cmp;
+
+    DSU(int n)
+    {
+        par.resize(n + 1);
+        size.resize(n + 1);
+        rep(i, 1, n + 1)
+        {
+            par[i] = i;
+            size[i] = 1;
+        }
+        cmp = n;
+    }
+
+    int findUpar(int u)
+    {
+        if (par[u] == u)
+            return u;
+        return par[u] = findUpar(par[u]);
+    }
+
+    void unionBySize(int u, int v)
+    {
+        int par_u = findUpar(u);
+        int par_v = findUpar(v);
+        if (par_u == par_v)
+            return;
+
+        if (size[par_u] >= size[par_v])
+        {
+            size[par_u] += size[par_v];
+            par[par_v] = par_u;
+        }
+        else
+        {
+            size[par_v] += size[par_u];
+            par[par_u] = par_v;
+        }
+        cmp--;
+    }
+};
+
+int main()
+{
+    int n, m;
+    cin >> n >> m;
+    DSU ds(n);
+    // vector<pair<int,ll>> res;
+    vector<pair<ll, pair<int, int>>> edges;
+    while (m--)
+    {
+        int u, v;
+        ll wt;
+        cin >> u >> v >> wt;
+        edges.push_back({wt, {u, v}});
+    }
+
+    sort(edges.begin(), edges.end());
+    ll res = 0;
+    for (auto itr : edges)
+    {
+        ll wt = itr.first;
+        int u = itr.second.first;
+        int v = itr.second.second;
+
+        if (ds.findUpar(u) != ds.findUpar(v))
+        {
+            res += wt;
+            ds.unionBySize(u, v);
+        }
+    }
+
+    if (ds.cmp == 1)
+        cout << res << endl;
+    else
+        cout << "IMPOSSIBLE\n";
+}
