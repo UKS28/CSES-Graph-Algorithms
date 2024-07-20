@@ -1,0 +1,78 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i, st, ed) for (int i = st; i < ed; i++)
+
+// SUBPROBLEM
+// -- we need to print after each query disjoint set union
+// -- we also need to keep track of maximum  size
+
+class DSU
+{
+public:
+    vector<int> par;
+    vector<ll> size;
+    ll mxSize;
+    int cmp;
+
+    DSU(int n)
+    {
+        par.resize(n + 1);
+        size.resize(n + 1);
+        rep(i, 1, n + 1)
+        {
+            par[i] = i;
+            size[i] = 1;
+        }
+        mxSize = 1;
+        cmp = n;
+    }
+
+    int findUpar(int u)
+    {
+        if (par[u] == u)
+            return u;
+        return par[u] = findUpar(par[u]);
+    }
+
+    void unionBySize(int u, int v)
+    {
+        int par_u = findUpar(u);
+        int par_v = findUpar(v);
+        if (par_u == par_v)
+            return;
+
+        if (size[par_u] >= size[par_v])
+        {
+            size[par_u] += size[par_v];
+            par[par_v] = par_u;
+            mxSize = max(mxSize, size[par_u]);
+        }
+        else
+        {
+            size[par_v] += size[par_u];
+            par[par_u] = par_v;
+            mxSize = max(mxSize, size[par_v]);
+        }
+        cmp--;
+    }
+};
+
+int main()
+{
+    int n, m;
+    cin >> n >> m;
+    DSU ds(n);
+    // vector<pair<int,ll>> res;
+    while (m--)
+    {
+        int u, v;
+        cin >> u >> v;
+        ds.unionBySize(u, v);
+        cout << ds.cmp << " " << ds.mxSize << endl;
+        // res.push_back({ds.cmp,ds.mxSize});
+    }
+    // cout<<" -----------\n";
+    // rep(i,0,res.size())
+    // cout<<res[i].first<<' '<<res[i].second<<endl;
+}
