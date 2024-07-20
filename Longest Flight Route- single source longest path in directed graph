@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i, st, ed) for (int i = st; i < ed; i++)
+
+// SUBPROBLEM
+// - single soruce longest path in directed graph
+// -- toposort to find single source shortest path with negative edges
+// -- and then we will perform rexlaxation according to topological order
+void dfs(vector<pair<ll, ll>> adj[], int node, vector<int> &vis, stack<ll> &st)
+{
+    vis[node] = 1;
+    for (auto &itr : adj[node])
+        if (vis[itr.first] == 0)
+            dfs(adj, itr.first, vis, st);
+    st.push(node);
+}
+
+int main()
+{
+    // 1. taking inputs and storing in adjacency list
+    ll n, m;
+    cin >> n >> m;
+    vector<pair<ll, ll>> adj[n + 1];
+    while (m--)
+    {
+        ll u, v;
+        cin >> u >> v;
+        adj[u].push_back({v, -1});
+    }
+
+    // 2. find the topological order
+    vector<int> vis(n + 1);
+    stack<ll> st;
+    dfs(adj, 1, vis, st);
+
+    // 3. performing relaxation in topological order
+    vector<ll> par(n + 1);
+    vector<ll> dis(n + 1, 1e14);
+    par[1] = -1;
+    dis[1] = 0;
+    while (st.empty() == false)
+    {
+        ll node = st.top();
+        st.pop();
+
+        for (auto &itr : adj[node])
+        {
+            ll adjnode = itr.first;
+            ll wt = itr.second;
+            if (dis[adjnode] > dis[node] + wt)
+            {
+                dis[adjnode] = dis[node] + wt;
+                par[adjnode] = node;
+            }
+        }
+    }
+
+    if (dis[n] == 1e14)
+    {
+        std::cout << "IMPOSSIBLE\n";
+    }
+    else
+    {
+        // perform backtracking and storing the result
+        vector<ll> res;
+        ll x = n;
+        while (par[x] != -1)
+        {
+            res.push_back(x);
+            x = par[x];
+        }
+        res.push_back(1);
+        reverse(res.begin(), res.end());
+
+        std::cout << res.size() << endl;
+        for (ll &ele : res)
+            std::cout << ele << " ";
+    }
+}
