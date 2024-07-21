@@ -1,0 +1,74 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i, st, ed) for (int i = st; i < ed; i++)
+
+// SUBPROBLEM
+// -- shortest distance in directed graph -->topological order require or dijkstra
+// -- cnt of shortest distance path --> modification
+// -- min nodes to traverse --> modification
+// -- maximum nodes to traverse --> modification
+
+int main()
+{
+    ll mod = 1e9 + 7;
+    int n, m;
+    cin >> n >> m;
+    vector<pair<int, ll>> adj[n + 1];
+    while (m--)
+    {
+        int a, b;
+        ll c;
+        cin >> a >> b >> c;
+        adj[a].push_back({b, c});
+    }
+
+    vector<ll> dis(n + 1, 1e17);
+    vector<ll> cnt(n + 1, 0);
+    vector<int> mx(n + 1, 0);
+    vector<int> mn(n + 1, INT_MAX);
+
+    dis[1] = 0;
+    cnt[1] = 1;
+    mn[1] = 0;
+
+    priority_queue<
+        pair<ll, int>,
+        vector<pair<ll, int>>,
+        greater<pair<ll, int>>>
+        pq;
+    pq.push({0, 1});
+
+    while (pq.empty() == false)
+    {
+        int node = pq.top().second;
+        ll wt = pq.top().first;
+        pq.pop();
+
+        // important line
+        if (wt > dis[node])
+            continue;
+
+        for (auto &itr : adj[node])
+        {
+
+            if (dis[itr.first] == dis[node] + itr.second)
+            {
+                cnt[itr.first] = (cnt[node] + cnt[itr.first]) % mod;
+                mx[itr.first] = max(1 + mx[node], mx[itr.first]);
+                mn[itr.first] = min(1 + mn[node], mn[itr.first]);
+            }
+
+            if (dis[itr.first] > dis[node] + itr.second)
+            {
+                dis[itr.first] = dis[node] + itr.second;
+                pq.push({dis[itr.first], itr.first});
+                cnt[itr.first] = cnt[node] % mod;
+                mx[itr.first] = 1 + mx[node];
+                mn[itr.first] = 1 + mn[node];
+            }
+        }
+    }
+
+    cout << dis[n] << ' ' << cnt[n] << ' ' << mn[n] << ' ' << mx[n] << endl;
+}
