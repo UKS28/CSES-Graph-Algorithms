@@ -1,0 +1,79 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i, st, ed) for (int i = st; i < ed; i++)
+
+// SUBPROBLEM
+// like strongly connected component --- kosaraju algorith
+// 1.find topo sort
+// 2.reverse the graph 
+// 3. apply dfs on the reversed graph
+// question -A game has n planets, connected by m teleporters. Two planets a and b belong to the same kingdom exactly when there is a route both from a to b and from b to a.
+// Your task is to determine for each planet its kingdom.
+// whenever there is a path from x to y and there is also a path from y to x then x and y are strongly connected (x-->a-->b-..-> y).
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void topological_order(vector<int> adj[], vector<int> &vis, int node, stack<int> &st)
+{
+    vis[node] = 1;
+    for (int &adjnode : adj[node])
+    {
+        if (vis[adjnode] == 0)
+            topological_order(adj, vis, adjnode, st);
+    }
+    st.push(node);
+}
+
+void dfs(vector<int> adj[], vector<int> &vis, vector<int> &cmp, int node, int type)
+{
+    cmp[node] = type;
+    vis[node] = 1;
+    for (int &adjnode : adj[node])
+    {
+        if (vis[adjnode] == 0)
+        {
+            dfs(adj, vis, cmp, adjnode, type);
+        }
+    }
+}
+
+int main()
+{
+    int n, m;
+    cin >> n >> m;
+    vector<int> adj[n + 1], revAdj[n + 1];
+    while (m--)
+    {
+        int u, v;
+        cin >> u >> v;
+        adj[u].push_back(v);
+        revAdj[v].push_back(u);
+    }
+    // 1. stroing topological order
+    vector<int> vis(n + 1);
+    stack<int> st;
+    for (int i = 1; i <= n; i++)
+        if (vis[i] == 0)
+            topological_order(adj, vis, i, st);
+
+    // 2. performing dfs on rev adj
+    for (int i = 0; i <= n; i++)
+        vis[i] = 0;
+    vector<int> cmp(n + 1);
+    int cnt = 1;
+    while (st.empty() == false)
+    {
+        int node = st.top();
+        st.pop();
+
+        if (vis[node] == 0)
+        {
+            dfs(revAdj, vis, cmp, node, cnt);
+            cnt++;
+        }
+    }
+    cout << cnt - 1 << endl;
+    for (int i = 1; i <= n; i++)
+        cout << cmp[i] << " ";
+    cout << endl;
+}
